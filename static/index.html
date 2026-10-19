@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LeadForge — AI-Assisted Lead Management & Scoring</title>
+  <title>LeadForge — AI-Assisted Lead Management & Scoring Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN for interactive visual analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Canvas Confetti for celebratory animations on Won deals -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -21,21 +28,91 @@
               tealHover: '#126E6B',
               surfaceDark: '#0D1726',
             }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 3s ease-in-out infinite',
+            'scale-in': 'scaleIn 0.25s ease-out forwards',
+            'fade-slide': 'fadeSlide 0.3s ease-out forwards',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            scaleIn: {
+              '0%': { opacity: '0', transform: 'scale(0.95)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
+            },
+            fadeSlide: {
+              '0%': { opacity: '0', transform: 'translateY(8px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
           }
         }
       }
     }
   </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    [x-cloak] { display: none !important; }
-    .badge-score-high { background-color: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-score-med { background-color: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-score-low { background-color: rgba(107, 114, 128, 0.15); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.3); }
-    .dark .badge-score-high { background-color: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(52, 211, 153, 0.4); }
-    .dark .badge-score-med { background-color: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); }
-    .dark .badge-score-low { background-color: rgba(156, 163, 175, 0.2); color: #9ca3af; border-color: rgba(156, 163, 175, 0.3); }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dark .glass-card {
+      background: rgba(19, 31, 49, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .badge-score-high {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+    .badge-score-med {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-score-low {
+      background-color: rgba(107, 114, 128, 0.15);
+      color: #6b7280;
+      border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+    .dark .badge-score-high {
+      background-color: rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.4);
+      box-shadow: 0 0 14px rgba(52, 211, 153, 0.25);
+    }
+    .dark .badge-score-med {
+      background-color: rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+    .dark .badge-score-low {
+      background-color: rgba(156, 163, 175, 0.2);
+      color: #9ca3af;
+      border-color: rgba(156, 163, 175, 0.3);
+    }
+
+    /* Radial gauge stroke transitions */
+    .gauge-circle {
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
   </style>
 </head>
 <body class="h-full bg-slate-50 text-slate-800 dark:bg-brand-surfaceDark dark:text-slate-100 flex flex-col transition-colors duration-200">
@@ -44,68 +121,86 @@
   <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
   <!-- API URL Configuration Modal -->
-  <div id="api-modal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700">
+  <div id="api-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 animate-scale-in">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <svg class="w-5 h-5 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          API Server Settings
+          API Server Connection
         </h3>
         <button onclick="toggleApiModal(false)" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        Configure the backend URL for LeadForge API requests. Useful when hosting this UI on GitHub Pages or custom domains.
+        Configure the backend URL for LeadForge API requests. When hosting on GitHub Pages or Render, point this to your backend service.
       </p>
       <div class="mb-4">
         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Backend Base URL</label>
-        <input type="text" id="api-base-url-input" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="http://localhost:8000">
-        <span class="text-xs text-slate-400 mt-1 block">Default: current origin (<span id="current-origin-label"></span>)</span>
+        <input type="text" id="api-base-url-input" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-blue outline-none font-mono" placeholder="http://localhost:8000">
+        <span class="text-xs text-slate-400 mt-1 block">Default: current origin (<span id="current-origin-label" class="font-mono"></span>)</span>
       </div>
-      <div class="flex justify-end gap-2">
-        <button onclick="resetApiBaseUrl()" class="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:underline">Reset to Default</button>
-        <button onclick="saveApiBaseUrl()" class="px-4 py-2 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-medium">Save & Reconnect</button>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="resetApiBaseUrl()" class="px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:underline">Reset to Default</button>
+        <button onclick="saveApiBaseUrl()" class="px-4 py-2 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-sm font-semibold shadow-md">Save & Reconnect</button>
       </div>
     </div>
   </div>
 
   <!-- Navigation Bar -->
-  <header class="bg-brand-navy text-white shadow-md sticky top-0 z-40 border-b border-brand-navyLight">
+  <header class="bg-brand-navy/95 backdrop-blur-md text-white shadow-lg sticky top-0 z-40 border-b border-brand-navyLight">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue to-brand-teal flex items-center justify-center shadow-lg shadow-brand-teal/20">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue via-teal-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-teal-500/30 animate-pulse-slow">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
         <div>
-          <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-teal-200 bg-clip-text text-transparent">LeadForge</span>
-          <span class="ml-2 px-2 py-0.5 text-[10px] font-semibold bg-brand-teal/25 text-teal-300 rounded-full border border-brand-teal/40 uppercase tracking-wider">AI Platform</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-teal-300 bg-clip-text text-transparent">LeadForge</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold bg-teal-500/20 text-teal-300 rounded-full border border-teal-500/30 uppercase tracking-widest">AI v1.0</span>
+          </div>
+          <p class="text-[10px] text-slate-400 hidden sm:block">Intelligent Lead Scoring & Pipeline CRM</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <!-- Action Items & Controls -->
+      <div class="flex items-center gap-2.5">
+        <!-- Seed Demo Data Button (Instant presentation helper) -->
+        <button onclick="seedDemoData()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-sm transition transform hover:scale-[1.02]" title="Seed 7 realistic enterprise leads, activities, and tasks with 1 click">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          <span class="hidden md:inline">Seed Demo Data</span>
+        </button>
+
         <!-- API Connection Status -->
-        <button onclick="toggleApiModal(true)" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition" title="Click to configure API Base URL">
-          <span id="api-status-dot" class="w-2 h-2 rounded-full bg-yellow-400"></span>
+        <button onclick="toggleApiModal(true)" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition" title="Click to configure API Base URL">
+          <span id="api-status-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span>
           <span id="api-status-text" class="text-slate-300 font-mono text-[11px]">Connecting...</span>
         </button>
 
+        <!-- API Docs link -->
+        <a href="/docs" target="_blank" class="hidden lg:flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Interactive Swagger API Documentation">
+          <svg class="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span>Swagger Docs</span>
+        </a>
+
         <!-- Dark/Light Mode Toggle -->
         <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Toggle Theme">
-          <svg id="theme-icon-dark" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-          <svg id="theme-icon-light" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-icon-dark" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg id="theme-icon-light" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         </button>
 
         <!-- Authenticated User Menu -->
-        <div id="auth-user-section" class="hidden flex items-center gap-3">
+        <div id="auth-user-section" class="hidden flex items-center gap-2.5">
           <div class="text-right hidden md:block">
-            <div id="user-display-name" class="text-sm font-semibold text-white leading-tight">User</div>
-            <div id="user-display-role" class="text-[11px] text-teal-300 capitalize">member</div>
+            <div id="user-display-name" class="text-xs font-bold text-white leading-tight">Alex Morgan</div>
+            <div id="user-display-role" class="text-[10px] text-teal-300 capitalize font-medium">Administrator</div>
           </div>
-          <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition">
-            Logout
+          <button onclick="handleLogout()" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            <span class="hidden sm:inline">Logout</span>
           </button>
         </div>
       </div>
@@ -113,17 +208,42 @@
   </header>
 
   <!-- Main Content Area -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
     <!-- Auth View (Shown when not logged in) -->
-    <div id="auth-view" class="max-w-md mx-auto my-8 bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700">
+    <div id="auth-view" class="max-w-md mx-auto my-6 bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-in">
       <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Welcome to LeadForge</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">AI-assisted lead scoring & pipeline intelligence</p>
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-brand-blue to-teal-400 flex items-center justify-center shadow-lg shadow-teal-500/25 mb-3 animate-float">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+        </div>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Welcome to LeadForge</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">AI-assisted lead scoring, tracking & operational analytics</p>
+      </div>
+
+      <!-- Quick Demo Login Presets (Exam / Showcase Helper) -->
+      <div class="mb-6 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/80">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+          Instant Demo Access (1-Click)
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="quickDemoLogin('admin')" class="px-3 py-2 text-xs font-semibold rounded-xl bg-brand-navy hover:bg-brand-navyLight text-white border border-slate-700 transition flex items-center justify-center gap-1.5">
+            <span>🛡️ Admin Mode</span>
+          </button>
+          <button type="button" onclick="quickDemoLogin('sales')" class="px-3 py-2 text-xs font-semibold rounded-xl bg-brand-blue hover:bg-brand-blueHover text-white transition flex items-center justify-center gap-1.5">
+            <span>💼 Sales Rep</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="relative flex py-2 items-center mb-4">
+        <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+        <span class="flex-shrink mx-3 text-[11px] text-slate-400 font-medium">Or enter credentials</span>
+        <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
       </div>
 
       <!-- Tab Buttons -->
-      <div class="flex border-b border-slate-200 dark:border-slate-700 mb-6">
+      <div class="flex border-b border-slate-200 dark:border-slate-700 mb-5">
         <button id="tab-btn-login" onclick="switchAuthTab('login')" class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-brand-blue text-brand-blue dark:text-blue-400">
           Sign In
         </button>
@@ -136,13 +256,13 @@
       <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-          <input type="email" id="login-email" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="user@company.com">
+          <input type="email" id="login-email" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-blue outline-none transition" placeholder="admin@leadforge.dev">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
-          <input type="password" id="login-password" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="••••••••">
+          <input type="password" id="login-password" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-blue outline-none transition" placeholder="••••••••">
         </div>
-        <button type="submit" id="btn-login" class="w-full py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold shadow-md transition">
+        <button type="submit" id="btn-login" class="w-full py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-sm font-bold shadow-md shadow-brand-blue/20 transition transform hover:scale-[1.01]">
           Sign In
         </button>
       </form>
@@ -151,94 +271,138 @@
       <form id="register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
-          <input type="text" id="reg-name" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-teal outline-none" placeholder="Jane Doe">
+          <input type="text" id="reg-name" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-teal outline-none" placeholder="Jordan Lee">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-          <input type="email" id="reg-email" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-teal outline-none" placeholder="jane@company.com">
+          <input type="email" id="reg-email" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-teal outline-none" placeholder="jordan@company.com">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password (min 6 characters)</label>
-          <input type="password" id="reg-password" minlength="6" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-teal outline-none" placeholder="••••••••">
+          <input type="password" id="reg-password" minlength="6" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-teal outline-none" placeholder="••••••••">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Role</label>
-          <select id="reg-role" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-teal outline-none">
+          <select id="reg-role" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-teal outline-none">
             <option value="member">Sales Member</option>
             <option value="admin">Administrator</option>
           </select>
         </div>
-        <button type="submit" id="btn-register" class="w-full py-2.5 bg-brand-teal hover:bg-brand-tealHover text-white rounded-lg text-sm font-semibold shadow-md transition">
+        <button type="submit" id="btn-register" class="w-full py-2.5 bg-brand-teal hover:bg-brand-tealHover text-white rounded-xl text-sm font-bold shadow-md transition transform hover:scale-[1.01]">
           Create Account
         </button>
       </form>
     </div>
 
     <!-- Dashboard View (Shown when logged in) -->
-    <div id="dashboard-view" class="hidden space-y-6">
+    <div id="dashboard-view" class="hidden space-y-6 animate-fade-slide">
 
       <!-- Analytics Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total Leads -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between transition hover:shadow-md hover:-translate-y-0.5">
           <div>
-            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Leads</div>
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Total Leads</div>
             <div id="stat-total-leads" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">0</div>
-            <div class="text-xs text-slate-400 mt-1">Active sales pipeline</div>
+            <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-500"></span> Active sales pipeline
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-brand-blue/20 text-brand-blue flex items-center justify-center">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-brand-blue/20 text-brand-blue flex items-center justify-center shadow-inner">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
           </div>
         </div>
 
         <!-- Conversion Rate -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between transition hover:shadow-md hover:-translate-y-0.5">
           <div>
-            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Conversion Rate</div>
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Conversion Rate</div>
             <div id="stat-conversion-rate" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0%</div>
-            <div class="text-xs text-slate-400 mt-1"><span id="stat-won-leads">0</span> won deals</div>
+            <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span id="stat-won-leads">0</span> won deals closed
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-inner">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
         </div>
 
         <!-- Average AI Score -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between transition hover:shadow-md hover:-translate-y-0.5">
           <div>
-            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Avg Lead Score</div>
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Avg Lead Score</div>
             <div id="stat-avg-score" class="text-3xl font-extrabold text-brand-teal dark:text-teal-400 mt-1">0.0</div>
-            <div class="text-xs text-slate-400 mt-1">Out of 100 max pts</div>
+            <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-teal-500"></span> Out of 100 max score
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-brand-teal dark:text-teal-400 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-brand-teal dark:text-teal-400 flex items-center justify-center shadow-inner">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
           </div>
         </div>
 
         <!-- Pending Tasks / Activities -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between transition hover:shadow-md hover:-translate-y-0.5">
           <div>
-            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pending Tasks</div>
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Pending Tasks</div>
             <div id="stat-pending-tasks" class="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0</div>
-            <div class="text-xs text-slate-400 mt-1"><span id="stat-total-activities">0</span> logged activities</div>
+            <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500"></span> <span id="stat-total-activities">0</span> logged activities
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
         </div>
       </div>
 
-      <!-- Controls & Filter Bar -->
-      <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 flex-1">
+      <!-- Collapsible Live Visual Charts Section -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Live Pipeline Visual Analytics</h3>
+              <p class="text-[11px] text-slate-400">Real-time status distribution & lead sources breakdown</p>
+            </div>
+          </div>
+          <button onclick="toggleChartsVisibility()" id="btn-toggle-charts" class="text-xs font-semibold text-brand-blue dark:text-blue-400 hover:underline">
+            Hide Charts
+          </button>
+        </div>
+
+        <div id="charts-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <!-- Pipeline Status Chart -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-700/50 flex flex-col items-center">
+            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Pipeline Funnel by Stage</span>
+            <div class="w-full max-w-[280px] h-[220px] relative flex items-center justify-center">
+              <canvas id="chart-pipeline-status"></canvas>
+            </div>
+          </div>
+
+          <!-- Lead Source Performance Chart -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-700/50 flex flex-col items-center">
+            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Lead Inflow by Source</span>
+            <div class="w-full h-[220px] relative">
+              <canvas id="chart-lead-sources"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5 flex-1">
           <!-- Search Input -->
           <div class="relative flex-1 min-w-[200px]">
-            <input type="text" id="filter-search" oninput="debounceSearch()" placeholder="Search name, company, email..." class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="filter-search" oninput="debounceSearch()" placeholder="Search name, company, email..." class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none transition">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
 
           <!-- Status Filter -->
-          <select id="filter-status" onchange="loadLeads()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none">
+          <select id="filter-status" onchange="loadLeads()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-brand-blue outline-none">
             <option value="">All Statuses</option>
             <option value="new">New</option>
             <option value="contacted">Contacted</option>
@@ -249,7 +413,7 @@
           </select>
 
           <!-- Source Filter -->
-          <select id="filter-source" onchange="loadLeads()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none">
+          <select id="filter-source" onchange="loadLeads()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-brand-blue outline-none">
             <option value="">All Sources</option>
             <option value="web_form">Web Form</option>
             <option value="referral">Referral</option>
@@ -259,7 +423,7 @@
           </select>
 
           <!-- Sort Select -->
-          <select id="filter-sort-by" onchange="loadLeads()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none">
+          <select id="filter-sort-by" onchange="loadLeads()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-brand-blue outline-none">
             <option value="created_at">Date Created</option>
             <option value="score">AI Lead Score</option>
             <option value="name">Lead Name</option>
@@ -267,34 +431,52 @@
           </select>
 
           <!-- Sort Order Button -->
-          <button id="btn-sort-order" onclick="toggleSortOrder()" class="p-2 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Toggle Ascending / Descending">
-            <svg id="sort-desc-icon" class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
-            <svg id="sort-asc-icon" class="w-5 h-5 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/></svg>
+          <button id="btn-sort-order" onclick="toggleSortOrder()" class="p-2 border border-slate-300 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Toggle Ascending / Descending">
+            <svg id="sort-desc-icon" class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+            <svg id="sort-asc-icon" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/></svg>
           </button>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="loadLeads(); loadAnalytics();" class="p-2 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Refresh">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <!-- View Switcher (Table vs Kanban) -->
+          <div class="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-700">
+            <button id="btn-view-table" onclick="setViewMode('table')" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs transition" title="Table View">
+              📋 Table
+            </button>
+            <button id="btn-view-kanban" onclick="setViewMode('kanban')" class="px-2.5 py-1 text-xs font-medium rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition" title="Kanban Pipeline">
+              📊 Kanban
+            </button>
+          </div>
+
+          <!-- Export CSV Button -->
+          <button onclick="exportLeadsCsv()" class="p-2 border border-slate-300 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Export Filtered Leads to CSV">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           </button>
-          <button onclick="openLeadModal()" class="px-4 py-2 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Add Lead
+
+          <!-- Refresh Button -->
+          <button onclick="loadLeads(); loadAnalytics();" class="p-2 border border-slate-300 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Refresh">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </button>
+
+          <!-- Add Lead Button -->
+          <button onclick="openLeadModal()" class="px-3.5 py-2 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition transform hover:scale-[1.02]">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <span>Add Lead</span>
           </button>
         </div>
       </div>
 
-      <!-- Lead List Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <!-- VIEW 1: Lead List Table -->
+      <div id="container-table-view" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 uppercase text-[11px] font-semibold tracking-wider">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 uppercase text-[10px] font-bold tracking-wider">
               <tr>
                 <th class="px-6 py-3.5">Lead & Company</th>
                 <th class="px-6 py-3.5">Contact</th>
                 <th class="px-6 py-3.5">Source</th>
                 <th class="px-6 py-3.5">Status</th>
-                <th class="px-6 py-3.5 text-center">AI Score</th>
+                <th class="px-6 py-3.5 text-center">AI Lead Score</th>
                 <th class="px-6 py-3.5">Owner</th>
                 <th class="px-6 py-3.5 text-right">Actions</th>
               </tr>
@@ -308,7 +490,7 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+        <div class="px-6 py-3.5 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div>
             Showing page <span id="page-num" class="font-bold text-slate-800 dark:text-white">1</span> of <span id="total-pages" class="font-bold text-slate-800 dark:text-white">1</span> (<span id="total-items">0</span> total leads)
           </div>
@@ -318,15 +500,87 @@
           </div>
         </div>
       </div>
+
+      <!-- VIEW 2: Pipeline Kanban Board -->
+      <div id="container-kanban-view" class="hidden overflow-x-auto pb-4">
+        <div class="grid grid-cols-6 gap-3.5 min-w-[1100px]">
+          <!-- Column: New -->
+          <div class="bg-slate-100/70 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/60 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span> New
+              </span>
+              <span id="kanban-count-new" class="text-[11px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 font-bold">0</span>
+            </div>
+            <div id="kanban-col-new" class="space-y-2 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Contacted -->
+          <div class="bg-slate-100/70 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/60 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Contacted
+              </span>
+              <span id="kanban-count-contacted" class="text-[11px] px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 font-bold">0</span>
+            </div>
+            <div id="kanban-col-contacted" class="space-y-2 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Qualified -->
+          <div class="bg-slate-100/70 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/60 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Qualified
+              </span>
+              <span id="kanban-count-qualified" class="text-[11px] px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300 font-bold">0</span>
+            </div>
+            <div id="kanban-col-qualified" class="space-y-2 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Proposal -->
+          <div class="bg-slate-100/70 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/60 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Proposal
+              </span>
+              <span id="kanban-count-proposal" class="text-[11px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold">0</span>
+            </div>
+            <div id="kanban-col-proposal" class="space-y-2 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Won -->
+          <div class="bg-slate-100/70 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/60 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Won 🎉
+              </span>
+              <span id="kanban-count-won" class="text-[11px] px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-bold">0</span>
+            </div>
+            <div id="kanban-col-won" class="space-y-2 flex-1 min-h-[300px]"></div>
+          </div>
+
+          <!-- Column: Lost -->
+          <div class="bg-slate-100/70 dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/60 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span> Lost
+              </span>
+              <span id="kanban-count-lost" class="text-[11px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">0</span>
+            </div>
+            <div id="kanban-col-lost" class="space-y-2 flex-1 min-h-[300px]"></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
   <!-- Add/Edit Lead Modal -->
-  <div id="lead-form-modal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
+  <div id="lead-form-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto animate-scale-in">
       <div class="flex items-center justify-between mb-4">
         <h3 id="lead-modal-title" class="text-lg font-bold text-slate-900 dark:text-white">Create New Lead</h3>
-        <button onclick="closeLeadModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <button onclick="closeLeadModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -334,27 +588,27 @@
       <form id="lead-form" onsubmit="handleLeadFormSubmit(event)" class="space-y-4">
         <input type="hidden" id="lead-modal-id">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Lead Name *</label>
-          <input type="text" id="lead-input-name" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="Acme Systems">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Lead / Contact Name *</label>
+          <input type="text" id="lead-input-name" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none" placeholder="David Sterling">
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
-            <input type="email" id="lead-input-email" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="contact@acme.com">
+            <input type="email" id="lead-input-email" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none" placeholder="david@company.com">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Company</label>
-            <input type="text" id="lead-input-company" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="Acme Corp">
+            <input type="text" id="lead-input-company" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none" placeholder="Apex FinTech">
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone</label>
-            <input type="text" id="lead-input-phone" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="+1-555-0199">
+            <input type="text" id="lead-input-phone" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none" placeholder="+1-555-0199">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Source</label>
-            <select id="lead-input-source" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none">
+            <select id="lead-input-source" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none font-medium">
               <option value="web_form">Web Form</option>
               <option value="referral">Referral</option>
               <option value="linkedin">LinkedIn</option>
@@ -364,8 +618,8 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pipeline Status</label>
-          <select id="lead-input-status" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pipeline Stage</label>
+          <select id="lead-input-status" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none font-medium">
             <option value="new">New</option>
             <option value="contacted">Contacted</option>
             <option value="qualified">Qualified</option>
@@ -375,29 +629,29 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes</label>
-          <textarea id="lead-input-notes" rows="3" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue outline-none" placeholder="Context, budget, requirements..."></textarea>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes & Requirements</label>
+          <textarea id="lead-input-notes" rows="3" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none" placeholder="Key prospect interests, budget notes, timeline..."></textarea>
         </div>
-        <div class="flex justify-end gap-3 pt-2">
-          <button type="button" onclick="closeLeadModal()" class="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Cancel</button>
-          <button type="submit" id="btn-save-lead" class="px-4 py-2 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold shadow-sm transition">Save Lead</button>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeLeadModal()" class="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium">Cancel</button>
+          <button type="submit" id="btn-save-lead" class="px-4 py-2 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-xs font-bold shadow-sm transition">Save Lead</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Lead Detail Drawer / Modal -->
-  <div id="lead-detail-modal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden">
+  <!-- Lead Detail Modal / AI Intelligence Engine -->
+  <div id="lead-detail-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden animate-scale-in">
       <!-- Detail Header -->
-      <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex flex-wrap items-start justify-between gap-4">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/50 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-3">
-            <h2 id="detail-lead-name" class="text-2xl font-bold text-slate-900 dark:text-white">Lead Name</h2>
-            <span id="detail-lead-score-pill" class="px-3 py-1 rounded-full text-xs font-bold border badge-score-high">Score: 85</span>
+            <h2 id="detail-lead-name" class="text-2xl font-black text-slate-900 dark:text-white">Lead Name</h2>
+            <span id="detail-lead-score-pill" class="px-3 py-1 rounded-full text-xs font-extrabold border badge-score-high">Score: 85</span>
           </div>
-          <div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400">
-            <span id="detail-lead-company" class="font-medium text-slate-700 dark:text-slate-300">Company</span>
+          <div class="flex flex-wrap items-center gap-2.5 mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <span id="detail-lead-company" class="font-bold text-slate-800 dark:text-slate-200">Company</span>
             <span>•</span>
             <span id="detail-lead-email">email@example.com</span>
             <span>•</span>
@@ -409,12 +663,12 @@
 
         <div class="flex items-center gap-2">
           <!-- Quick Status Dropdown -->
-          <select id="detail-status-select" onchange="updateLeadStatusFromDetail(this.value)" class="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-blue">
+          <select id="detail-status-select" onchange="updateLeadStatusFromDetail(this.value)" class="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-brand-blue">
             <option value="new">New</option>
             <option value="contacted">Contacted</option>
             <option value="qualified">Qualified</option>
             <option value="proposal">Proposal</option>
-            <option value="won">Won</option>
+            <option value="won">Won 🎉</option>
             <option value="lost">Lost</option>
           </select>
           <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
@@ -426,80 +680,98 @@
       <!-- Detail Body (Scrollable) -->
       <div class="p-6 overflow-y-auto space-y-6 flex-1">
 
-        <!-- AI Scoring Engine Card -->
-        <div class="bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-brand-navy/30 p-5 rounded-xl border border-blue-100 dark:border-slate-700/80 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
+        <!-- AI Scoring Engine Radial Card -->
+        <div class="bg-gradient-to-br from-slate-50 via-teal-50/20 to-blue-50/30 dark:from-slate-900 dark:via-brand-navy/30 dark:to-slate-900 p-5 rounded-2xl border border-teal-100 dark:border-slate-700/80 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-brand-teal/20 text-brand-teal flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-teal to-emerald-400 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
-              <h4 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">AI Scoring Intelligence Breakdown</h4>
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">AI Scoring Intelligence Breakdown</h4>
+                <p class="text-[10px] text-slate-400">Deterministic explainable weighting across 4 conversion dimensions</p>
+              </div>
             </div>
-            <button onclick="recalculateLeadScore()" class="text-xs font-medium text-brand-blue hover:text-brand-blueHover dark:text-blue-400 flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-              Recalculate
+            <button onclick="recalculateLeadScore()" class="text-xs font-bold text-brand-blue hover:text-brand-blueHover dark:text-blue-400 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 transition">
+              <svg id="recalc-spin-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>Recalculate</span>
             </button>
           </div>
 
-          <!-- Progress Bars Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
-            <!-- Purchase Intent -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-600 dark:text-slate-300 font-medium">Purchase Intent (Stage)</span>
-                <span id="score-intent-num" class="font-bold text-slate-800 dark:text-white">0 / 35 pts</span>
+          <!-- Radial Gauge + Component Breakdown -->
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <!-- Radial Score Meter -->
+            <div class="relative w-28 h-28 flex-shrink-0 flex items-center justify-center">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-slate-200 dark:text-slate-800" fill="transparent" />
+                <circle id="gauge-circle" cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-teal-500 gauge-circle" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="gauge-number" class="text-2xl font-black text-slate-900 dark:text-white">0</span>
+                <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Score</span>
               </div>
-              <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div id="score-intent-bar" class="h-full bg-brand-blue rounded-full" style="width: 0%"></div>
-              </div>
-              <p id="score-intent-desc" class="text-[11px] text-slate-400">Loading...</p>
             </div>
 
-            <!-- Engagement -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-600 dark:text-slate-300 font-medium">Engagement (Activities)</span>
-                <span id="score-engagement-num" class="font-bold text-slate-800 dark:text-white">0 / 25 pts</span>
+            <!-- Progress Bars Breakdown Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 flex-1 w-full">
+              <!-- Purchase Intent -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-600 dark:text-slate-300 font-semibold">Stage Intent</span>
+                  <span id="score-intent-num" class="font-bold text-slate-800 dark:text-white font-mono">0 / 35</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                  <div id="score-intent-bar" class="h-full bg-brand-blue rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="score-intent-desc" class="text-[10px] text-slate-400">Stage: New (5 pts)</p>
               </div>
-              <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div id="score-engagement-bar" class="h-full bg-brand-teal rounded-full" style="width: 0%"></div>
-              </div>
-              <p id="score-engagement-desc" class="text-[11px] text-slate-400">Loading...</p>
-            </div>
 
-            <!-- Profile Completeness -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-600 dark:text-slate-300 font-medium">Profile Completeness</span>
-                <span id="score-profile-num" class="font-bold text-slate-800 dark:text-white">0 / 20 pts</span>
+              <!-- Engagement Frequency -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-600 dark:text-slate-300 font-semibold">Engagement History</span>
+                  <span id="score-engagement-num" class="font-bold text-slate-800 dark:text-white font-mono">0 / 25</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                  <div id="score-engagement-bar" class="h-full bg-brand-teal rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="score-engagement-desc" class="text-[10px] text-slate-400">0 activities logged</p>
               </div>
-              <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div id="score-profile-bar" class="h-full bg-indigo-500 rounded-full" style="width: 0%"></div>
-              </div>
-              <p id="score-profile-desc" class="text-[11px] text-slate-400">Loading...</p>
-            </div>
 
-            <!-- Recency -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-600 dark:text-slate-300 font-medium">Recency (Last 7 Days)</span>
-                <span id="score-recency-num" class="font-bold text-slate-800 dark:text-white">0 / 20 pts</span>
+              <!-- Profile Completeness -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-600 dark:text-slate-300 font-semibold">Profile Completeness</span>
+                  <span id="score-profile-num" class="font-bold text-slate-800 dark:text-white font-mono">0 / 20</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                  <div id="score-profile-bar" class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="score-profile-desc" class="text-[10px] text-slate-400">Email, company & phone</p>
               </div>
-              <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div id="score-recency-bar" class="h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
+
+              <!-- Recency -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-600 dark:text-slate-300 font-semibold">Recent Recency (7d)</span>
+                  <span id="score-recency-num" class="font-bold text-slate-800 dark:text-white font-mono">0 / 20</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                  <div id="score-recency-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="score-recency-desc" class="text-[10px] text-slate-400">Interaction in past 7 days</p>
               </div>
-              <p id="score-recency-desc" class="text-[11px] text-slate-400">Loading...</p>
             </div>
           </div>
         </div>
 
-        <!-- Detail Tabs -->
+        <!-- Detail Tabs (Activities vs Tasks) -->
         <div>
           <div class="flex border-b border-slate-200 dark:border-slate-700 mb-4">
-            <button id="detail-tab-act" onclick="switchDetailTab('activities')" class="py-2 px-4 text-sm font-semibold border-b-2 border-brand-blue text-brand-blue dark:text-blue-400">
-              Activities & Logs (<span id="detail-act-count">0</span>)
+            <button id="detail-tab-act" onclick="switchDetailTab('activities')" class="py-2 px-4 text-xs font-bold border-b-2 border-brand-blue text-brand-blue dark:text-blue-400">
+              Interaction Timeline (<span id="detail-act-count">0</span>)
             </button>
-            <button id="detail-tab-task" onclick="switchDetailTab('tasks')" class="py-2 px-4 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent">
+            <button id="detail-tab-task" onclick="switchDetailTab('tasks')" class="py-2 px-4 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent">
               Follow-up Tasks (<span id="detail-task-count">0</span>)
             </button>
           </div>
@@ -507,21 +779,21 @@
           <!-- Activities Pane -->
           <div id="detail-pane-activities" class="space-y-4">
             <!-- New Activity Form -->
-            <form onsubmit="handleLogActivity(event)" class="bg-slate-50 dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+            <form onsubmit="handleLogActivity(event)" class="bg-slate-50 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
               <div class="flex flex-wrap items-center gap-3">
-                <select id="new-act-type" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold outline-none">
+                <select id="new-act-type" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold outline-none">
                   <option value="call">📞 Phone Call</option>
-                  <option value="email">✉️ Email</option>
-                  <option value="meeting">🤝 Meeting</option>
+                  <option value="email">✉️ Email Message</option>
+                  <option value="meeting">🤝 Meeting / Demo</option>
                   <option value="note">📝 Internal Note</option>
-                  <option value="other">📌 Other</option>
+                  <option value="other">📌 Other Activity</option>
                 </select>
-                <span class="text-xs text-slate-400">Adding activity automatically updates lead score</span>
+                <span class="text-[11px] text-slate-400">Logging an activity automatically recalibrates the AI score</span>
               </div>
-              <textarea id="new-act-notes" required rows="2" placeholder="Summary of interaction, next steps..." class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-brand-blue outline-none"></textarea>
+              <textarea id="new-act-notes" required rows="2" placeholder="Describe interaction outcome, customer response, objections handled..." class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-brand-blue outline-none"></textarea>
               <div class="flex justify-end">
-                <button type="submit" class="px-3 py-1.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-xs font-semibold shadow-sm transition">
-                  Log Activity
+                <button type="submit" class="px-3.5 py-1.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-xs font-bold shadow-sm transition">
+                  Log Interaction
                 </button>
               </div>
             </form>
@@ -535,15 +807,15 @@
           <!-- Tasks Pane -->
           <div id="detail-pane-tasks" class="space-y-4 hidden">
             <!-- New Task Form -->
-            <form onsubmit="handleCreateTask(event)" class="bg-slate-50 dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+            <form onsubmit="handleCreateTask(event)" class="bg-slate-50 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input type="text" id="new-task-title" required placeholder="Task title (e.g. Send updated pricing deck)" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-blue">
-                <input type="datetime-local" id="new-task-due" class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-blue">
+                <input type="text" id="new-task-title" required placeholder="Task title (e.g. Send revised security terms)" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-blue">
+                <input type="datetime-local" id="new-task-due" class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-blue">
               </div>
-              <input type="text" id="new-task-desc" placeholder="Optional task description..." class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-blue">
+              <input type="text" id="new-task-desc" placeholder="Optional context or instructions..." class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-blue">
               <div class="flex justify-end">
-                <button type="submit" class="px-3 py-1.5 bg-brand-teal hover:bg-brand-tealHover text-white rounded-lg text-xs font-semibold shadow-sm transition">
-                  Add Follow-up Task
+                <button type="submit" class="px-3.5 py-1.5 bg-brand-teal hover:bg-brand-tealHover text-white rounded-xl text-xs font-bold shadow-sm transition">
+                  Schedule Follow-up
                 </button>
               </div>
             </form>
@@ -560,8 +832,16 @@
 
   <!-- Footer -->
   <footer class="bg-white dark:bg-brand-navy border-t border-slate-200 dark:border-brand-navyLight py-4 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
-      LeadForge &copy; 2026. Built with FastAPI, SQLite, and Tailwind CSS.
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-700 dark:text-slate-200">LeadForge</span>
+        <span>•</span>
+        <span>AI-Assisted Lead Management & Scoring</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>FastAPI + SQLite + Tailwind</span>
+        <a href="/docs" target="_blank" class="hover:underline text-brand-blue dark:text-blue-400">API Documentation</a>
+      </div>
     </div>
   </footer>
 
@@ -574,12 +854,17 @@
     let authToken = localStorage.getItem('leadforge_token') || null;
 
     let leadsCurrentPage = 1;
-    let leadsPerPage = 10;
+    let leadsPerPage = 20;
     let leadsSortBy = 'created_at';
     let leadsSortOrder = 'desc';
     let searchDebounceTimeout = null;
-
     let activeDetailLeadId = null;
+    let currentViewMode = 'table'; // 'table' or 'kanban'
+
+    // Chart instances
+    let pipelineStatusChart = null;
+    let leadSourcesChart = null;
+    let allCurrentLeads = [];
 
     // Initialize application on load
     document.addEventListener('DOMContentLoaded', () => {
@@ -613,16 +898,20 @@
       localStorage.setItem('leadforge_theme', isDark ? 'dark' : 'light');
       document.getElementById('theme-icon-dark').classList.toggle('hidden', !isDark);
       document.getElementById('theme-icon-light').classList.toggle('hidden', isDark);
+      // Re-render charts with updated theme colors if existing
+      if (pipelineStatusChart) {
+        loadAnalytics();
+      }
     }
 
     // Toast Notifications
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      toast.className = `p-3.5 rounded-xl shadow-lg border text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center justify-between gap-3 ${
-        type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800' :
-        type === 'error' ? 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-200 dark:border-red-800' :
-        'bg-slate-50 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700'
+      toast.className = `p-3.5 rounded-2xl shadow-xl border text-xs font-semibold transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center justify-between gap-3 ${
+        type === 'success' ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-800' :
+        type === 'error' ? 'bg-red-50 text-red-900 border-red-200 dark:bg-red-950/90 dark:text-red-200 dark:border-red-800' :
+        'bg-slate-50 text-slate-900 border-slate-200 dark:bg-slate-800/90 dark:text-slate-100 dark:border-slate-700'
       }`;
       toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">&times;</button>`;
       container.appendChild(toast);
@@ -648,7 +937,6 @@
     function saveApiBaseUrl() {
       let url = document.getElementById('api-base-url-input').value.trim();
       if (!url) url = defaultApiUrl;
-      // Strip trailing slash
       url = url.replace(/\/+$/, '');
       API_BASE_URL = url;
       localStorage.setItem('leadforge_api_base_url', API_BASE_URL);
@@ -681,14 +969,12 @@
           dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
           return true;
         }
-      } catch (e) {
-        // network error
-      }
+      } catch (e) {}
       dot.className = 'w-2 h-2 rounded-full bg-red-400';
       return false;
     }
 
-    // API Helper with Authentication
+    // Authenticated API Helper
     async function apiRequest(endpoint, options = {}) {
       const headers = {
         'Content-Type': 'application/json',
@@ -712,6 +998,61 @@
           showToast(`Network error connecting to API: ${err.message}`, 'error');
         }
         throw err;
+      }
+    }
+
+    // Fast 1-Click Demo Login Helper
+    async function quickDemoLogin(accountType = 'admin') {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/demo/quick-auth?account=${accountType}`);
+        if (res.ok) {
+          const data = await res.json();
+          authToken = data.access_token;
+          currentUser = data.user;
+          localStorage.setItem('leadforge_token', authToken);
+          showDashboardView();
+          showToast(`Logged in as ${currentUser.name}!`, 'success');
+          // Fire subtle confetti
+          if (typeof confetti === 'function') {
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+          }
+        } else {
+          showToast('Could not initialize demo login. Starting server...', 'error');
+        }
+      } catch (err) {
+        showToast('Make sure backend server is running on ' + API_BASE_URL, 'error');
+      }
+    }
+
+    // 1-Click Seed Demo Pipeline
+    async function seedDemoData() {
+      try {
+        showToast('Seeding 7 enterprise leads and activity history...', 'info');
+        const res = await fetch(`${API_BASE_URL}/api/v1/demo/seed`, { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          showToast(data.message, 'success');
+          if (typeof confetti === 'function') {
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+          }
+          if (!currentUser && data.demo_accounts) {
+            authToken = data.demo_accounts.admin.token;
+            currentUser = {
+              name: data.demo_accounts.admin.name,
+              email: data.demo_accounts.admin.email,
+              role: 'admin'
+            };
+            localStorage.setItem('leadforge_token', authToken);
+            showDashboardView();
+          } else {
+            loadLeads();
+            loadAnalytics();
+          }
+        } else {
+          showToast('Demo data seeding failed', 'error');
+        }
+      } catch (e) {
+        showToast('Network error during seeding', 'error');
       }
     }
 
@@ -759,7 +1100,6 @@
           showToast(data.detail || 'Login failed', 'error');
         }
       } catch (err) {
-        // error already handled in apiRequest
       } finally {
         btn.disabled = false;
         btn.textContent = 'Sign In';
@@ -838,7 +1178,37 @@
       loadAnalytics();
     }
 
-    // Analytics loader
+    // View Mode Management (Table vs Kanban)
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const btnTable = document.getElementById('btn-view-table');
+      const btnKanban = document.getElementById('btn-view-kanban');
+      const tableContainer = document.getElementById('container-table-view');
+      const kanbanContainer = document.getElementById('container-kanban-view');
+
+      if (mode === 'table') {
+        tableContainer.classList.remove('hidden');
+        kanbanContainer.classList.add('hidden');
+        btnTable.className = 'px-2.5 py-1 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs transition';
+        btnKanban.className = 'px-2.5 py-1 text-xs font-medium rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition';
+      } else {
+        tableContainer.classList.add('hidden');
+        kanbanContainer.classList.remove('hidden');
+        btnKanban.className = 'px-2.5 py-1 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs transition';
+        btnTable.className = 'px-2.5 py-1 text-xs font-medium rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition';
+        renderKanbanBoard(allCurrentLeads);
+      }
+    }
+
+    // Toggle Charts Visibility
+    function toggleChartsVisibility() {
+      const wrapper = document.getElementById('charts-wrapper');
+      const btn = document.getElementById('btn-toggle-charts');
+      const isHidden = wrapper.classList.toggle('hidden');
+      btn.textContent = isHidden ? 'Show Charts' : 'Hide Charts';
+    }
+
+    // Analytics loader & Chart.js renderer
     async function loadAnalytics() {
       try {
         const res = await apiRequest('/api/v1/analytics/summary');
@@ -847,11 +1217,99 @@
           document.getElementById('stat-total-leads').textContent = data.total_leads;
           document.getElementById('stat-conversion-rate').textContent = `${data.conversion_rate}%`;
           document.getElementById('stat-won-leads').textContent = data.by_status.won || 0;
-          document.getElementById('stat-avg-score').textContent = data.avg_score.toFixed(1);
+          document.getElementById('stat-avg-score').textContent = Number(data.avg_score || 0).toFixed(1);
           document.getElementById('stat-pending-tasks').textContent = data.pending_tasks;
           document.getElementById('stat-total-activities').textContent = data.total_activities;
+
+          renderCharts(data);
         }
       } catch (e) {}
+    }
+
+    function renderCharts(analyticsData) {
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94A3B8' : '#64748B';
+
+      // 1. Pipeline Status Doughnut Chart
+      const statusLabels = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'];
+      const statusCounts = statusLabels.map(st => analyticsData.by_status[st.toLowerCase()] || 0);
+
+      const ctxStatus = document.getElementById('chart-pipeline-status').getContext('2d');
+      if (pipelineStatusChart) pipelineStatusChart.destroy();
+
+      pipelineStatusChart = new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+          labels: statusLabels,
+          datasets: [{
+            data: statusCounts,
+            backgroundColor: [
+              '#3B82F6', // New (blue)
+              '#A855F7', // Contacted (purple)
+              '#6366F1', // Qualified (indigo)
+              '#F59E0B', // Proposal (amber)
+              '#10B981', // Won (emerald)
+              '#94A3B8'  // Lost (slate)
+            ],
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 10,
+                color: textColor,
+                font: { size: 10, family: 'Plus Jakarta Sans', weight: 'bold' }
+              }
+            }
+          },
+          cutout: '68%'
+        }
+      });
+
+      // 2. Lead Sources Bar Chart
+      const sourceLabels = Object.keys(analyticsData.by_source || {});
+      const sourceCounts = Object.values(analyticsData.by_source || {});
+      const cleanSourceLabels = sourceLabels.map(s => s.replace('_', ' ').toUpperCase());
+
+      const ctxSource = document.getElementById('chart-lead-sources').getContext('2d');
+      if (leadSourcesChart) leadSourcesChart.destroy();
+
+      leadSourcesChart = new Chart(ctxSource, {
+        type: 'bar',
+        data: {
+          labels: cleanSourceLabels.length ? cleanSourceLabels : ['WEB', 'REFERRAL', 'LINKEDIN', 'COLD CALL'],
+          datasets: [{
+            label: 'Leads Inflow',
+            data: sourceCounts.length ? sourceCounts : [0, 0, 0, 0],
+            backgroundColor: '#14B8A6',
+            borderRadius: 8,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { size: 10, family: 'Plus Jakarta Sans' } }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: textColor, font: { size: 10, family: 'Plus Jakarta Sans' } },
+              grid: { color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(148, 163, 184, 0.15)' }
+            }
+          }
+        }
+      });
     }
 
     // Leads loader & filter
@@ -899,7 +1357,11 @@
         if (!res || !res.ok) return;
 
         const data = await res.json();
-        renderLeadsTable(data.items);
+        allCurrentLeads = data.items || [];
+        renderLeadsTable(allCurrentLeads);
+        if (currentViewMode === 'kanban') {
+          renderKanbanBoard(allCurrentLeads);
+        }
 
         // Update pagination
         document.getElementById('page-num').textContent = data.page;
@@ -917,7 +1379,7 @@
           <tr>
             <td colspan="7" class="px-6 py-12 text-center text-slate-400">
               <svg class="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-              No leads match current criteria.
+              No leads match criteria. Click <strong>"Seed Demo Data"</strong> to populate sample records!
             </td>
           </tr>
         `;
@@ -939,31 +1401,36 @@
         return `
           <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition">
             <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
-              <div class="cursor-pointer hover:text-brand-blue" onclick="openDetailModal('${l.id}')">
-                <span class="font-semibold">${escapeHtml(l.name)}</span>
-                ${l.company ? `<div class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(l.company)}</div>` : ''}
+              <div class="cursor-pointer hover:text-brand-blue flex items-center gap-3" onclick="openDetailModal('${l.id}')">
+                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center font-bold text-xs uppercase">
+                  ${(l.name || 'L').substring(0, 2)}
+                </div>
+                <div>
+                  <span class="font-bold">${escapeHtml(l.name)}</span>
+                  ${l.company ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 font-normal">${escapeHtml(l.company)}</div>` : ''}
+                </div>
               </div>
             </td>
             <td class="px-6 py-4 text-xs text-slate-600 dark:text-slate-300">
-              ${l.email ? `<div>${escapeHtml(l.email)}</div>` : ''}
-              ${l.phone ? `<div class="text-slate-400">${escapeHtml(l.phone)}</div>` : ''}
+              ${l.email ? `<div class="font-mono text-[11px]">${escapeHtml(l.email)}</div>` : ''}
+              ${l.phone ? `<div class="text-slate-400 text-[11px]">${escapeHtml(l.phone)}</div>` : ''}
             </td>
             <td class="px-6 py-4">
-              <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 ${l.source.replace('_', ' ')}
               </span>
             </td>
             <td class="px-6 py-4">
-              <span class="px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${statusBadge}">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold capitalize ${statusBadge}">
                 ${l.status}
               </span>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="inline-block px-3 py-1 rounded-full text-xs font-bold ${scoreClass}">
-                ${l.score} / 100
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-black ${scoreClass}">
+                ${l.score >= 80 ? '🔥 ' : (l.score >= 50 ? '⚡ ' : '')}${l.score} / 100
               </span>
             </td>
-            <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+            <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400 font-medium">
               ${escapeHtml(l.owner_name || 'Assigned')}
             </td>
             <td class="px-6 py-4 text-right space-x-1">
@@ -980,6 +1447,86 @@
           </tr>
         `;
       }).join('');
+    }
+
+    // Render Pipeline Kanban Board
+    function renderKanbanBoard(leads) {
+      const stages = ['new', 'contacted', 'qualified', 'proposal', 'won', 'lost'];
+      const stageMap = {
+        new: [],
+        contacted: [],
+        qualified: [],
+        proposal: [],
+        won: [],
+        lost: []
+      };
+
+      leads.forEach(l => {
+        if (stageMap[l.status]) stageMap[l.status].push(l);
+      });
+
+      stages.forEach(st => {
+        const countBadge = document.getElementById(`kanban-count-${st}`);
+        const colContainer = document.getElementById(`kanban-col-${st}`);
+        const colLeads = stageMap[st];
+
+        if (countBadge) countBadge.textContent = colLeads.length;
+        if (!colContainer) return;
+
+        if (colLeads.length === 0) {
+          colContainer.innerHTML = '<div class="h-24 border-2 border-dashed border-slate-200 dark:border-slate-700/60 rounded-xl flex items-center justify-center text-[10px] text-slate-400">Empty</div>';
+          return;
+        }
+
+        colContainer.innerHTML = colLeads.map(l => {
+          const scoreClass = l.score >= 70 ? 'badge-score-high' : (l.score >= 40 ? 'badge-score-med' : 'badge-score-low');
+          return `
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition cursor-pointer" onclick="openDetailModal('${l.id}')">
+              <div class="flex items-start justify-between gap-1 mb-1">
+                <span class="font-bold text-xs text-slate-900 dark:text-white leading-tight">${escapeHtml(l.name)}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${scoreClass}">${l.score}</span>
+              </div>
+              ${l.company ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 mb-2 truncate">${escapeHtml(l.company)}</div>` : ''}
+              <div class="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                <span class="capitalize">${l.source.replace('_', ' ')}</span>
+                <span class="font-semibold text-brand-blue dark:text-blue-400">Inspect →</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+
+    // Export Leads as CSV
+    function exportLeadsCsv() {
+      if (!allCurrentLeads || allCurrentLeads.length === 0) {
+        showToast('No leads available to export', 'error');
+        return;
+      }
+      const headers = ['ID', 'Name', 'Company', 'Email', 'Phone', 'Source', 'Status', 'Score', 'Owner', 'CreatedAt'];
+      const rows = allCurrentLeads.map(l => [
+        l.id,
+        `"${(l.name || '').replace(/"/g, '""')}"`,
+        `"${(l.company || '').replace(/"/g, '""')}"`,
+        `"${(l.email || '').replace(/"/g, '""')}"`,
+        `"${(l.phone || '').replace(/"/g, '""')}"`,
+        l.source,
+        l.status,
+        l.score,
+        `"${(l.owner_name || '').replace(/"/g, '""')}"`,
+        l.created_at
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `LeadForge_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Leads exported to CSV successfully', 'success');
     }
 
     // Lead Form Modal (Create / Edit)
@@ -1076,7 +1623,6 @@
       const modal = document.getElementById('lead-detail-modal');
       modal.classList.remove('hidden');
 
-      // Fetch lead details and score in parallel
       await Promise.all([
         loadLeadDetailInfo(leadId),
         loadLeadScoreDetail(leadId),
@@ -1103,7 +1649,7 @@
         document.getElementById('detail-lead-owner').textContent = lead.owner_name || 'Assigned';
         document.getElementById('detail-status-select').value = lead.status;
 
-        updateScoreBadge(lead.score);
+        updateScoreBadgeAndGauge(lead.score);
       } catch (e) {}
     }
 
@@ -1113,51 +1659,87 @@
         if (!res.ok) return;
         const data = await res.json();
 
-        updateScoreBadge(data.score);
+        updateScoreBadgeAndGauge(data.score);
 
         // Intent (max 35)
-        const intentPct = Math.round((data.breakdown.purchase_intent / 35) * 100);
-        document.getElementById('score-intent-num').textContent = `${data.breakdown.purchase_intent} / 35 pts`;
+        const intentPct = Math.min(100, Math.round((data.breakdown.purchase_intent / 35) * 100));
+        document.getElementById('score-intent-num').textContent = `${data.breakdown.purchase_intent} / 35`;
         document.getElementById('score-intent-bar').style.width = `${intentPct}%`;
         document.getElementById('score-intent-desc').textContent = data.explanation.purchase_intent.description;
 
         // Engagement (max 25)
-        const engPct = Math.round((data.breakdown.engagement / 25) * 100);
-        document.getElementById('score-engagement-num').textContent = `${data.breakdown.engagement} / 25 pts`;
+        const engPct = Math.min(100, Math.round((data.breakdown.engagement / 25) * 100));
+        document.getElementById('score-engagement-num').textContent = `${data.breakdown.engagement} / 25`;
         document.getElementById('score-engagement-bar').style.width = `${engPct}%`;
         document.getElementById('score-engagement-desc').textContent = data.explanation.engagement.description;
 
         // Profile (max 20)
-        const profPct = Math.round((data.breakdown.profile_completeness / 20) * 100);
-        document.getElementById('score-profile-num').textContent = `${data.breakdown.profile_completeness} / 20 pts`;
+        const profPct = Math.min(100, Math.round((data.breakdown.profile_completeness / 20) * 100));
+        document.getElementById('score-profile-num').textContent = `${data.breakdown.profile_completeness} / 20`;
         document.getElementById('score-profile-bar').style.width = `${profPct}%`;
         document.getElementById('score-profile-desc').textContent = data.explanation.profile_completeness.description;
 
         // Recency (max 20)
-        const recPct = Math.round((data.breakdown.recency / 20) * 100);
-        document.getElementById('score-recency-num').textContent = `${data.breakdown.recency} / 20 pts`;
+        const recPct = Math.min(100, Math.round((data.breakdown.recency / 20) * 100));
+        document.getElementById('score-recency-num').textContent = `${data.breakdown.recency} / 20`;
         document.getElementById('score-recency-bar').style.width = `${recPct}%`;
         document.getElementById('score-recency-desc').textContent = data.explanation.recency.description;
       } catch (e) {}
     }
 
-    function updateScoreBadge(score) {
+    function updateScoreBadgeAndGauge(score) {
       const pill = document.getElementById('detail-lead-score-pill');
+      const numSpan = document.getElementById('gauge-number');
+      const circle = document.getElementById('gauge-circle');
+
       pill.textContent = `Score: ${score} / 100`;
-      pill.className = `px-3 py-1 rounded-full text-xs font-bold border ${score >= 70 ? 'badge-score-high' : (score >= 40 ? 'badge-score-med' : 'badge-score-low')}`;
+      pill.className = `px-3 py-1 rounded-full text-xs font-black border ${score >= 70 ? 'badge-score-high' : (score >= 40 ? 'badge-score-med' : 'badge-score-low')}`;
+
+      // Animate score counter
+      let currentVal = parseInt(numSpan.textContent) || 0;
+      const step = Math.ceil(Math.abs(score - currentVal) / 10) || 1;
+      const counter = setInterval(() => {
+        if (currentVal < score) currentVal = Math.min(score, currentVal + step);
+        else if (currentVal > score) currentVal = Math.max(score, currentVal - step);
+        numSpan.textContent = currentVal;
+        if (currentVal === score) clearInterval(counter);
+      }, 25);
+
+      // Radial stroke animation (circumference = 2 * PI * 40 = 251.2)
+      const circumference = 251.2;
+      const offset = circumference - (score / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+
+      if (score >= 80) {
+        circle.className = 'text-emerald-500 gauge-circle';
+      } else if (score >= 50) {
+        circle.className = 'text-amber-500 gauge-circle';
+      } else {
+        circle.className = 'text-slate-400 gauge-circle';
+      }
     }
 
     async function recalculateLeadScore() {
       if (!activeDetailLeadId) return;
+      const spinIcon = document.getElementById('recalc-spin-icon');
+      spinIcon.classList.add('animate-spin');
+
       try {
         const res = await apiRequest(`/api/v1/leads/${activeDetailLeadId}/score`, { method: 'POST' });
         if (res.ok) {
+          const scoreData = await res.json();
           await loadLeadScoreDetail(activeDetailLeadId);
           loadLeads();
           loadAnalytics();
-          showToast('Lead score recalculated', 'success');
+          showToast(`Lead score recalculated: ${scoreData.score} pts`, 'success');
+          if (scoreData.score >= 80 && typeof confetti === 'function') {
+            confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+      } finally {
+        setTimeout(() => spinIcon.classList.remove('animate-spin'), 600);
+      }
     }
 
     async function updateLeadStatusFromDetail(newStatus) {
@@ -1171,7 +1753,17 @@
           await loadLeadScoreDetail(activeDetailLeadId);
           loadLeads();
           loadAnalytics();
-          showToast(`Status changed to ${newStatus}`, 'success');
+          showToast(`Stage updated to ${newStatus.toUpperCase()}`, 'success');
+
+          // Celebrate Won Deals with Confetti!
+          if (newStatus === 'won' && typeof confetti === 'function') {
+            confetti({
+              particleCount: 120,
+              spread: 100,
+              origin: { y: 0.6 },
+              colors: ['#10B981', '#34D399', '#6EE7B7', '#F59E0B']
+            });
+          }
         }
       } catch (e) {}
     }
@@ -1186,13 +1778,13 @@
       if (tab === 'activities') {
         paneAct.classList.remove('hidden');
         paneTask.classList.add('hidden');
-        tabAct.className = 'py-2 px-4 text-sm font-semibold border-b-2 border-brand-blue text-brand-blue dark:text-blue-400';
-        tabTask.className = 'py-2 px-4 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent';
+        tabAct.className = 'py-2 px-4 text-xs font-bold border-b-2 border-brand-blue text-brand-blue dark:text-blue-400';
+        tabTask.className = 'py-2 px-4 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent';
       } else {
         paneAct.classList.add('hidden');
         paneTask.classList.remove('hidden');
-        tabTask.className = 'py-2 px-4 text-sm font-semibold border-b-2 border-brand-teal text-brand-teal dark:text-teal-400';
-        tabAct.className = 'py-2 px-4 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent';
+        tabTask.className = 'py-2 px-4 text-xs font-bold border-b-2 border-brand-teal text-brand-teal dark:text-teal-400';
+        tabAct.className = 'py-2 px-4 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent';
       }
     }
 
@@ -1219,10 +1811,10 @@
         };
 
         container.innerHTML = activities.map(a => `
-          <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-lg text-xs space-y-1">
+          <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs space-y-1">
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
-              <span class="font-semibold text-slate-800 dark:text-slate-200">${typeIcons[a.type] || a.type}</span>
-              <span>${new Date(a.created_at).toLocaleString()}</span>
+              <span class="font-bold text-slate-800 dark:text-slate-200">${typeIcons[a.type] || a.type}</span>
+              <span class="font-mono text-[10px]">${new Date(a.created_at).toLocaleString()}</span>
             </div>
             <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">${escapeHtml(a.notes)}</p>
             <div class="text-[10px] text-slate-400">By: ${escapeHtml(a.actor_name || 'Staff')}</div>
@@ -1249,7 +1841,7 @@
           await loadLeadScoreDetail(activeDetailLeadId);
           loadLeads();
           loadAnalytics();
-          showToast('Activity logged and lead score updated!', 'success');
+          showToast('Interaction logged & AI score boosted!', 'success');
         }
       } catch (e) {}
     }
@@ -1271,15 +1863,15 @@
         container.innerHTML = tasks.map(t => {
           const isDone = t.status === 'completed';
           return `
-            <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-lg flex items-start justify-between gap-3 text-xs">
+            <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl flex items-start justify-between gap-3 text-xs">
               <div class="flex items-start gap-2.5 flex-1">
-                <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleTaskStatus('${t.id}', this.checked)" class="mt-1 h-4 w-4 rounded border-slate-300 text-brand-teal focus:ring-brand-teal">
+                <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleTaskStatus('${t.id}', this.checked)" class="mt-1 h-4 w-4 rounded border-slate-300 text-brand-teal focus:ring-brand-teal cursor-pointer">
                 <div>
-                  <div class="font-semibold ${isDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'}">${escapeHtml(t.title)}</div>
+                  <div class="font-bold ${isDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'}">${escapeHtml(t.title)}</div>
                   ${t.description ? `<p class="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">${escapeHtml(t.description)}</p>` : ''}
                   <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-2">
-                    ${t.due_at ? `<span>Due: ${new Date(t.due_at).toLocaleString()}</span>` : ''}
-                    <span class="capitalize px-1.5 py-0.2 bg-slate-100 dark:bg-slate-800 rounded font-medium">${t.status}</span>
+                    ${t.due_at ? `<span>Due: ${new Date(t.due_at).toLocaleDateString()}</span>` : ''}
+                    <span class="capitalize px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md font-bold">${t.status}</span>
                   </div>
                 </div>
               </div>
@@ -1318,7 +1910,7 @@
           document.getElementById('new-task-desc').value = '';
           await loadLeadTasks(activeDetailLeadId);
           loadAnalytics();
-          showToast('Follow-up task created', 'success');
+          showToast('Follow-up task scheduled', 'success');
         }
       } catch (e) {}
     }
@@ -1347,7 +1939,7 @@
       } catch (e) {}
     }
 
-    // Escape helper for safe innerHTML
+    // Escape helper for safe HTML rendering
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)

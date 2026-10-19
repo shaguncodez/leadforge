@@ -3,6 +3,7 @@ from app.routers.leads import router as leads_router
 from app.routers.activities import router as activities_router
 from app.routers.tasks import router as tasks_router
 from app.routers.analytics import router as analytics_router
+from app.routers.demo import router as demo_router
 
 __all__ = [
     "auth_router",
@@ -10,4 +11,6 @@ __all__ = [
     "activities_router",
     "tasks_router",
     "analytics_router",
+    "demo_router",
 ]
+

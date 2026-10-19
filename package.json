@@ -1,0 +1,21 @@
+{
+  "name": "leadforge",
+  "version": "1.0.0",
+  "description": "LeadForge — AI-Assisted Lead Management & Scoring Platform",
+  "scripts": {
+    "dev": "python -m uvicorn app.main:app --reload --port 8000",
+    "start": "python -m uvicorn app.main:app --host 0.0.0.0 --port 8000",
+    "test": "pytest -v",
+    "serve": "python -m uvicorn app.main:app --reload --port 8000"
+  },
+  "keywords": [
+    "fastapi",
+    "lead-management",
+    "crm",
+    "ai-scoring",
+    "python",
+    "college-project"
+  ],
+  "author": "LeadForge Team",
+  "license": "MIT"
+}

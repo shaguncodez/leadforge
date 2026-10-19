@@ -11,9 +11,11 @@ from app.routers import (
     activities_router,
     analytics_router,
     auth_router,
+    demo_router,
     leads_router,
     tasks_router,
 )
+
 
 
 @asynccontextmanager
@@ -50,6 +52,8 @@ app.include_router(leads_router)
 app.include_router(activities_router)
 app.include_router(tasks_router)
 app.include_router(analytics_router)
+app.include_router(demo_router)
+
 
 
 @app.get("/health", tags=["Health"])
@@ -70,5 +74,19 @@ if os.path.exists(static_dir):
 
 @app.get("/", include_in_schema=False)
 async def root():
-    """Root endpoint redirects to interactive API documentation."""
+    """Root endpoint serves the interactive web dashboard or redirects to docs."""
+    index_file = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_file):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_file)
+    return RedirectResponse(url="/docs")
+
+
+@app.get("/dashboard", include_in_schema=False)
+async def dashboard():
+    """Dashboard endpoint serves the web app."""
+    index_file = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_file):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_file)
     return RedirectResponse(url="/docs")
