@@ -1,0 +1,8 @@
+[build]
+  publish = "static"
+
+# SPA fallback redirect for clean routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
