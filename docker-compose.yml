@@ -1,0 +1,24 @@
+services:
+  leadforge-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: leadforge-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./leadforge.db
+      - SECRET_KEY=leadforge-compose-secret-key-32chars-min-change-prod
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+    volumes:
+      - leadforge_data:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  leadforge_data:
