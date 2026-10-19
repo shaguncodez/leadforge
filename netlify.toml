@@ -1,5 +1,9 @@
 [build]
   publish = "static"
+  command = "echo 'Deploying LeadForge static frontend...'"
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
 
 # SPA fallback redirect for clean routing
 [[redirects]]
